@@ -3,7 +3,7 @@
 #include <string>
 #include "rand.h"
 
-int main() 
+int main()
 {
     std::cout << "Enter master key: ";
     // Создаём строку для мастер-пароля
@@ -17,27 +17,36 @@ int main()
     // Вводим название сайта
     std::cin >> siteName;
 
+    // Создаём переменную для хранения целочисленного значения мастер-пароля
+    ull keyTemp = stringToInteger(masterKey);
+
     // Создаём (пока что пустую) строку для пароля
     std::string password;
     // Создаём массив с символами для пароля
-    char symbols[] = {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&*"};
+    char symbols[] = { "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&*_" };
 
     // Генерируем случайный пароль длиной в зависимости от количества символов в названии сайта
-    for (char c : siteName) 
+    for (char c : siteName)
     {
-        // В качестве сида указываем целочисленное значение текущего символа из строки
-        srand((int)c);
+    /* 
+        В качестве сида указываем целочисленное значение мастер-пароля, 
+        умноженное на текущий символ из строки с названием сайта
+    */
+        srand(keyTemp * (ull)c);
         // Генерируем пароль
         passwordGenerator(password, symbols);
     }
     // Если символов в названии сайта меньше, чем 7
-    if (siteName.length() < 7) 
+    if (siteName.length() < 7)
     {
-        for (char c : siteName) 
+        // Выбираем случайную длину второй части пароля
+        for (int i = 0; i <= getRandomNumber(6, 15); i++)
         {
-            // В качестве сида указываем целочисленное значение текущего символа из строки + случайное число 
-            // (чтобы не получился просто дубликат пароля который сгенерировался перед этим)
-            srand((int)c + rand());
+        /* 
+            В качестве сида указываем целочисленное значение мастер-пароля, 
+            умноженное на случайное число
+        */                               
+            srand(keyTemp * rand());
             // Генерируем вторую половину пароля
             passwordGenerator(password, symbols);
         }
@@ -61,10 +70,25 @@ int getRandomNumber(int min, int max)
 }
 
 // Функция для генерации пароля
-void passwordGenerator(std::string& password, char symbols[69]) 
+void passwordGenerator(std::string& password, char symbols[70])
 {
     // Генерируем случайный символ из массива
-    char randomChar = symbols[getRandomNumber(0, 68)];
+    char randomChar = symbols[getRandomNumber(0, 69)];
     // Добавляем случайный символ в пароль
     password.push_back(randomChar);
+}
+
+// Функция для преобразования строки в число
+ull stringToInteger(std::string str)
+{
+    // Создаём переменную для результата
+    ull result = 0;
+
+    for (ull i = 0; i < (ull)str.length(); i++) 
+    {
+        // Прибавляем к результату символ из строки умноженный на его индекс + 1
+        result += str[i] * (i + 1);
+    }
+    // Возвращаем результат
+    return result;
 }
